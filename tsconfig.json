@@ -12,15 +12,12 @@
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
-
-    // ✅ These two lines are key:
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"]
     },
-
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "vite-env.d.ts"]
 }
