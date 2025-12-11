@@ -50,22 +50,37 @@ export const JOURNAL_ARTICLES: JournalArticle[] = [
     id: 1,
     title: "The Future of Open Access",
     date: "Dec 12, 2024",
-    excerpt: "How blockchain and decentralized systems are reshaping the publication landscape.",
-    content: React.createElement("p", null, "The landscape of scientific publishing is undergoing a seismic shift..."),
+    excerpt:
+      "How blockchain and decentralized systems are reshaping the publication landscape.",
+    content: React.createElement(
+      "p",
+      null,
+      "The landscape of scientific publishing is undergoing a seismic shift..."
+    ),
   },
   {
     id: 2,
     title: "Citation Metrics vs. Impact",
     date: "Nov 05, 2024",
-    excerpt: "Moving beyond h-index to understand the true societal impact of research.",
-    content: React.createElement("p", null, "For decades, the h-index has been the gold standard, but it fails to capture..."),
+    excerpt:
+      "Moving beyond h-index to understand the true societal impact of research.",
+    content: React.createElement(
+      "p",
+      null,
+      "For decades, the h-index has been the gold standard, but it fails to capture..."
+    ),
   },
   {
     id: 3,
     title: 'The "Simple" Transformer',
     date: "Oct 20, 2024",
-    excerpt: "Why architectural simplicity often leads to the most robust breakthroughs.",
-    content: React.createElement("p", null, 'Looking back at the landmark paper "Attention is All You Need", we see a pattern...'),
+    excerpt:
+      "Why architectural simplicity often leads to the most robust breakthroughs.",
+    content: React.createElement(
+      "p",
+      null,
+      'Looking back at the landmark paper "Attention is All You Need", we see a pattern...'
+    ),
   },
 ];
 
@@ -81,7 +96,8 @@ const REAL_PAPERS: Paper[] = [
     publicationDate: "2025",
     category: "Artificial Intelligence",
     doi: "10.1038/nexus.2025.001",
-    whyMatters: "This work is crucial because it documents the paradigm shift currently occurring in science...",
+    whyMatters:
+      "This work is crucial because it documents the paradigm shift currently occurring in science...",
     upvotes: 128,
     timestamp: 1740000000000,
   },
@@ -94,7 +110,11 @@ const ADJECTIVES = ["Critical", "Novel", "Systematic", "Unified"];
 const TOPICS = ["Transformer Architecture", "Quantum Entanglement"];
 const CONTEXTS = ["using Deep Learning", "in Low-Resource Settings"];
 const METHODS = ["Framework", "Analysis", "Architecture"];
-const CATEGORIES = ["Machine Learning", "Artificial Intelligence", "Mathematics"];
+const CATEGORIES = [
+  "Machine Learning",
+  "Artificial Intelligence",
+  "Mathematics",
+];
 const FIRST_NAMES = ["Arjun", "Meera", "Li", "Elena"];
 const LAST_NAMES = ["Menon", "Wang", "Smith", "Patel"];
 
@@ -109,7 +129,11 @@ const generate10kPapers = (): Paper[] => {
     generated.push({
       id: `gen-${i}`,
       title,
-      authors: [`${FIRST_NAMES[i % FIRST_NAMES.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`],
+      authors: [
+        `${FIRST_NAMES[i % FIRST_NAMES.length]} ${
+          LAST_NAMES[(i + 1) % LAST_NAMES.length]
+        }`,
+      ],
       abstractPreview: "Automatically generated research paper...",
       abstract: "This is an AI-generated placeholder paper for simulation.",
       publicationDate: `202${i % 5}`,
@@ -124,15 +148,13 @@ const generate10kPapers = (): Paper[] => {
 };
 
 // --- FETCH REAL PAPERS FROM ARXIV (CORS FIXED) ---
-export async function fetchArxivPapers(maxResults = 500, category = "cs.AI"): Promise<Paper[]> {
+export async function fetchArxivPapers(
+  maxResults = 500,
+  category = "cs.AI"
+): Promise<Paper[]> {
   try {
-    const proxyUrl = "https://api.allorigins.win/get?url=";
-    const targetUrl = encodeURIComponent(
-      `https://export.arxiv.org/api/query?search_query=cat:${category}&start=0&max_results=${maxResults}`
-    );
-    const response = await fetch(`${proxyUrl}${targetUrl}`);
-    const result = await response.json();
-    const text = result.contents;
+    const response = await fetch(`/api/arxiv?category=${category}&maxResults=${maxResults}`);
+    const text = await response.text();
 
     const parser = new DOMParser();
     const xml = parser.parseFromString(text, "application/xml");
@@ -140,11 +162,13 @@ export async function fetchArxivPapers(maxResults = 500, category = "cs.AI"): Pr
 
     return entries.map((entry, index) => {
       const title = entry.getElementsByTagName("title")[0]?.textContent || "";
-      const summary = entry.getElementsByTagName("summary")[0]?.textContent || "";
+      const summary =
+        entry.getElementsByTagName("summary")[0]?.textContent || "";
       const authors = Array.from(entry.getElementsByTagName("author")).map(
         (a) => a.getElementsByTagName("name")[0]?.textContent || ""
       );
-      const published = entry.getElementsByTagName("published")[0]?.textContent || "";
+      const published =
+        entry.getElementsByTagName("published")[0]?.textContent || "";
       const id = entry.getElementsByTagName("id")[0]?.textContent || "";
 
       return {
@@ -162,7 +186,7 @@ export async function fetchArxivPapers(maxResults = 500, category = "cs.AI"): Pr
       };
     });
   } catch (error) {
-    console.error("Failed to fetch from arXiv:", error);
+    console.error("❌ Failed to fetch from arXiv:", error);
     return [];
   }
 }
@@ -182,7 +206,7 @@ const loadUserPapers = async (): Promise<Paper[]> => {
 export const saveUserPaper = async (paper: Paper) => {
   console.log("🟡 Attempting to insert paper:", paper);
 
-  const { data, error } = await supabase.from("papers").insert([
+  const { error } = await supabase.from("papers").insert([
     {
       id: paper.id,
       title: paper.title,
@@ -201,7 +225,7 @@ export const saveUserPaper = async (paper: Paper) => {
   if (error) {
     console.error("❌ Supabase insert failed:", error.message);
   } else {
-    console.log("✅ Paper saved successfully:", data);
+    console.log("✅ Paper saved successfully to Supabase.");
   }
 };
 
@@ -215,8 +239,16 @@ export const initializeDatabase = async (): Promise<Paper[]> => {
 
     if (error) throw error;
 
-    const arxivCategories = ["cs.AI", "cs.CL", "cs.LG", "physics.optics", "math.PR"];
-    const arxivPapersNested = await Promise.all(arxivCategories.map((cat) => fetchArxivPapers(1000, cat)));
+    const arxivCategories = [
+      "cs.AI",
+      "cs.CL",
+      "cs.LG",
+      "physics.optics",
+      "math.PR",
+    ];
+    const arxivPapersNested = await Promise.all(
+      arxivCategories.map((cat) => fetchArxivPapers(1000, cat))
+    );
     const arxivPapers = arxivPapersNested.flat();
 
     const userPapers = await loadUserPapers();
@@ -232,11 +264,15 @@ export const initializeDatabase = async (): Promise<Paper[]> => {
 
     supabase
       .channel("public:papers")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "papers" }, (payload) => {
-        const newPaper = payload.new as Paper;
-        console.log("🆕 New paper detected:", newPaper);
-        allPapers.unshift(newPaper);
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "papers" },
+        (payload) => {
+          const newPaper = payload.new as Paper;
+          console.log("🆕 New paper detected:", newPaper);
+          allPapers.unshift(newPaper);
+        }
+      )
       .subscribe();
 
     return allPapers;
