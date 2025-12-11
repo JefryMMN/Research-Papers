@@ -208,24 +208,31 @@ const loadUserPapers = async (): Promise<Paper[]> => {
 
 // --- SAVE PAPER (Local + Supabase) ---
 export const saveUserPaper = async (paper: Paper) => {
-  try {
-    // Local Save
-    const result = await window.storage.get(USER_PAPERS_KEY, true);
-    const papers: Paper[] = result?.value ? JSON.parse(result.value) : [];
-    if (!papers.some((p) => p.id === paper.id)) {
-      papers.unshift(paper);
-      await window.storage.set(USER_PAPERS_KEY, JSON.stringify(papers), true);
-    }
+  console.log("🟡 Attempting to insert paper:", paper);
 
-    // Supabase Save
-    const { error } = await supabase.from('papers').insert([paper]);
-    if (error) throw error;
+  const { data, error } = await supabase.from("papers").insert([{
+    id: paper.id,
+    title: paper.title,
+    authors: paper.authors,
+    abstractPreview: paper.abstractPreview,
+    abstract: paper.abstract,
+    publicationDate: paper.publicationDate,
+    category: paper.category,
+    doi: paper.doi,
+    whyMatters: paper.whyMatters,
+    upvotes: paper.upvotes,
+    timestamp: paper.timestamp
+  }]);
 
-    console.log('✅ Paper saved to Supabase');
-  } catch (e) {
-    console.error('❌ Failed to save paper:', e);
+  if (error) {
+    console.error("❌ Supabase insert failed:", error.message);
+    alert("Insert failed: " + error.message);
+  } else {
+    console.log("✅ Supabase insert success:", data);
+    alert("✅ Paper saved successfully!");
   }
 };
+
 
 // --- INITIALIZE DATABASE (Global + Realtime + arXiv + Generated) ---
 export const initializeDatabase = async (): Promise<Paper[]> => {
