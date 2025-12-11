@@ -13,8 +13,9 @@ import CartDrawer from './components/CartDrawer';
 import Checkout from './components/Checkout';
 import Footer from './components/Footer';
 import Assistant from './components/Assistant';
-import { initializeDatabase, saveUserPaper } from './constants';
-import { Paper, ViewState } from './types';
+import { initializeDatabase, saveUserPaper } from "./constants.ts";
+import { Paper, ViewState } from "./types.ts";
+
 
 const App: React.FC = () => {
   // --- State ---

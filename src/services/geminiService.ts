@@ -6,7 +6,7 @@
 
 
 import { GoogleGenAI } from "@google/genai";
-import { Paper } from '../types';
+import { Paper } from '../src/types';
 
 const getSystemInstruction = (papers: Paper[]) => {
   // To avoid token limits, we prioritize User Papers and Real Papers, then top rated generated ones.

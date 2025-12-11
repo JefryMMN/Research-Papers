@@ -6,7 +6,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage, Paper } from '../types';
-import { sendMessageToGemini } from '../services/geminiService';
+import { sendMessageToGemini } from '../../services/geminiService';
 
 interface AssistantProps {
   papers: Paper[];
