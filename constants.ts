@@ -2,6 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
+console.log("🧠 SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL);
+console.log("🧠 SUPABASE KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY ? "✅ Exists" : "❌ Missing");
 
 import React from 'react';
 import { Paper, JournalArticle } from './types';
